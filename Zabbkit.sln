@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zabbkit.Web", "Zabbkit.Web\Zabbkit.Web.csproj", "{75A4A68C-BD38-4BEC-B52B-0BABF471C335}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Production|Any CPU = Production|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{75A4A68C-BD38-4BEC-B52B-0BABF471C335}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75A4A68C-BD38-4BEC-B52B-0BABF471C335}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75A4A68C-BD38-4BEC-B52B-0BABF471C335}.Production|Any CPU.ActiveCfg = Production|Any CPU
+		{75A4A68C-BD38-4BEC-B52B-0BABF471C335}.Production|Any CPU.Build.0 = Production|Any CPU
+		{75A4A68C-BD38-4BEC-B52B-0BABF471C335}.Production|Any CPU.Deploy.0 = Production|Any CPU
+		{75A4A68C-BD38-4BEC-B52B-0BABF471C335}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75A4A68C-BD38-4BEC-B52B-0BABF471C335}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		EnterpriseLibraryConfigurationToolBinariesPath = packages\Unity.2.1.505.2\lib\NET35
+	EndGlobalSection
+EndGlobal

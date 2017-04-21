@@ -1,0 +1,57 @@
+<project name="WPNotifications" default="setversion" basedir="." xmlns="http://nant.sf.net/release/0.86-beta1/nant.xsd">
+
+	<property name="sys.programFiles.x86" value="C:\Program Files (x86)" overwrite="false" />
+	<property name="sys.vs9.mstest.exe" value="${sys.programFiles.x86}\Microsoft Visual Studio 10.0\Common7\IDE\MSTest.exe" overwrite="false" />
+	<property name="sys.vs9.fxcopcmd.exe" value="${sys.programFiles.x86}\Microsoft FxCop 1.36\FxCopCmd.exe" overwrite="false" />
+	<property name="sys.vsBaseDir" value="${sys.programFiles.x86}\Microsoft Visual Studio 10.0\Common7\IDE"/>
+	<property name="nant.settings.currentframework" value="net-4.0"/>
+
+	<property name="configuration" value="release"/>
+
+	<property name="ver" value="${CCNetLabel}"/>
+	<property name="versionAssemblyInfoFile" value="GlobalAssemblyInfo.cs" overwrite="false" />
+	
+	<target name="setversion" description="Set assembly version">
+		<echo message="Version is ${ver}"/>
+		<script language="C#">
+			<code>
+				<![CDATA[
+     public static void ScriptMain(Project project)
+     {
+	    string ver = project.Properties["ver"];
+	    string fileName = project.Properties["versionAssemblyInfoFile"];	    
+	    if (!String.IsNullOrEmpty(ver) && !String.IsNullOrEmpty(fileName))
+        { 
+            //Update assembly info
+            string content;
+            string assemblyInfoFile = Path.Combine(project.BaseDirectory, fileName);
+            using (StreamReader sr = new StreamReader(assemblyInfoFile))
+                content = sr.ReadToEnd();
+            content = Regex.Replace(content, @"\[assembly: AssemblyVersion\("".*""\)\]", "[assembly: AssemblyVersion(\"" + ver + "\")]");
+            content = Regex.Replace(content, @"\[assembly: AssemblyFileVersion\("".*""\)\]", "[assembly: AssemblyFileVersion(\"" + ver + "\")]");
+            using (StreamWriter sw = new StreamWriter(assemblyInfoFile, false))
+                sw.Write(content);
+
+            //Update installer ver
+            //string installerVer = "\"ProductVersion\" = \"8:" + ver.Substring(0, ver.LastIndexOf('.')) + '"';
+            //string guid = Guid.NewGuid().ToString().ToUpper();
+            //string productVer = "\"ProductCode\" = \"8:{"+guid+"}\"";
+            //using (StreamReader sr = new StreamReader(installerPpojectFile))
+            //    content = sr.ReadToEnd();
+            //content = Regex.Replace(content, "\"ProductVersion\" = \"8:[\\d\\.]*\"", installerVer);
+            //content = Regex.Replace(content, "\"ProductCode\" = \"8:(\\{)\\w{8}\\-\\w{4}\\-\\w{4}\\-\\w{4}\\-\\w{12}(\\})\"", productVer);
+            //using (StreamWriter sw = new StreamWriter(installerPpojectFile, false))
+            //    sw.Write(content);
+        }
+     }
+     ]]>
+			</code>
+			<imports>
+				<import namespace="System.Text.RegularExpressions"/>
+			</imports>
+			<references>
+				<include name="System.dll"/>
+			</references>
+		</script>
+	</target>		
+</project>

@@ -1,0 +1,160 @@
+﻿<header>
+    <div class="content-wrapper">
+        <div class="float-left">
+            <p class="site-title">
+                <a href="~/">Zabbkit</a>
+            </p>
+        </div>
+    </div>
+</header>
+<div id="body">
+    <section class="featured">
+        <div class="content-wrapper">
+            <hgroup class="title">
+                <h1>Welcome to Zabbkit push notification server</h1>
+            </hgroup>
+            <p>
+                The server allows you sending custom defined push notifications to your mobile devices.<br/>
+                <em>Unfortunatelly we had to stop supporting windows phone notifications. They are not delivered yet.</em>
+            </p>
+            <p>
+                To learn more about Zabbkit mobile client visit
+                <a href="http://cactussoft.biz/zabbkit" title="Zabbkit">our page.</a>
+                To get information how to run you push-notifications, visit <a href="https://www.zabbix.com/forum/showthread.php?p=136028" title="Zabbix comunity forum">community forum.</a><br/>
+                Have a trouble? <a href="mailto:info@cactussoft.biz" title="CactusSoft e-mail">Contact us!</a>
+            </p>
+        </div>
+    </section>
+    <section class="content-wrapper clear-fix">
+        <h3>Here you can check your message status</h3>
+        <span>Tracking number:</span><br />
+        <input type="text" data-bind="value: trackId" />
+        <button>Check</button><br />
+        <span id="request-result-section">
+            <span data-bind='visible: trackId.hasError, text: trackId.validationMessage' class="error"></span>
+            <p />
+            <span data-bind="visible: showData">
+                <span>Device: </span><strong data-bind="text: deviceType"></strong>
+                <br />
+                <span>Status: </span><strong data-bind="text: status"></strong>
+                <br />
+                <span>Updated: </span><strong data-bind="text: updated"></strong>
+                <br />
+                <span>Description: </span><strong data-bind="text: description"></strong>
+            </span>
+            <span class="error" data-bind="visible: showError">
+                <strong data-bind="text: errorStatus"></strong>
+                <br />
+                <span data-bind="text: errorMessage"></span>
+            </span>
+        </span>
+
+    </section>
+</div>
+
+<script>
+    (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+            (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date(); a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+    ga('create', 'UA-39618628-2', 'auto');
+    ga('send', 'pageview');
+</script>
+
+<script type="text/javascript">
+    if (typeof String.prototype.startsWith != 'function') {
+        String.prototype.startsWith = function (str) {
+            return this.indexOf(str) == 0;
+        };
+    }
+
+    function ViewModel() {
+        this.showData = ko.observable(false);
+        this.showError = ko.observable(false);
+        this.trackId = ko.observable().extend({ objectId: "* 24-hex tracking number" });
+        this.status = undefined;
+        this.deviceType = undefined;
+        this.description = undefined;
+        this.updated = undefined;
+        this.errorMessage = undefined;
+        this.errorStatus = undefined;
+    }
+
+    $(document).ready(function () {
+        var viewModel = new ViewModel();
+        ko.applyBindings(viewModel);
+
+        $("button").click(function () {
+            if (viewModel.trackId.hasError())
+                return;
+            var apiUrl = document.URL;
+            if (apiUrl.charAt(apiUrl.length - 1) == '/')
+                apiUrl = apiUrl.substr(0, apiUrl.length - 1);
+            apiUrl += "/api/track/" + viewModel.trackId();
+            $.ajax({
+                type: "GET",
+                url: apiUrl,
+                contentType: "application/json",
+                success: function (data) {
+                    viewModel.status = data.Status;
+                    viewModel.description = data.Description;
+                    viewModel.deviceType = data.DeviceType;
+                    viewModel.updated = data.Updated;
+                    viewModel.showError(false);
+                    viewModel.showData(true);
+                    var resultSection = $("#request-result-section").get(0);
+                    ko.cleanNode(resultSection);
+                    ko.applyBindings(viewModel, resultSection);
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    viewModel.errorMessage = undefined;
+                    viewModel.errorStatus = undefined;
+                    if (jqXHR != undefined) {
+                        var contentType = jqXHR.getResponseHeader("content-type");
+                        if (contentType != undefined && contentType.startsWith("application/json")) {
+                            viewModel.errorStatus = jqXHR.status;
+                            viewModel.errorStatus += " " + jqXHR.statusText;
+                            var responseObject = jQuery.parseJSON(jqXHR.responseText);
+                            viewModel.errorMessage = responseObject.Message;
+                        }
+                    }
+                    if (viewModel.errorStatus == undefined)
+                        viewModel.errorStatus = textStatus;
+                    viewModel.showData(false);
+                    viewModel.showError(true);
+                    var resultSection = $("#request-result-section").get(0);
+                    ko.cleanNode(resultSection);
+                    ko.applyBindings(viewModel, resultSection);
+                }
+            });
+        });
+    });
+
+    ko.extenders.objectId = function (target, overrideMessage) {
+        //add some sub-observables to our observable
+        if (target.hasError == undefined)
+            target.hasError = ko.observable();
+        if (target.validationMessage == undefined)
+            target.validationMessage = ko.observable();
+
+        //define a function to do validation
+        function validate(newValue) {
+            target.hasError(newValue && newValue.length == 24 ? false : true);
+            target.validationMessage(target.hasError() ? overrideMessage || "ObjectId is 24hex number" : "");
+        }
+
+        //initial validation
+        validate(target());
+
+        //validate whenever the value changes
+        target.subscribe(validate);
+
+        //return the original observable
+        return target;
+    };
+
+
+</script>
